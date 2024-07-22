@@ -1,11 +1,11 @@
-# Flask Web App Tutorial
+# Goi - Kanji Learning App
 
 ## Setup & Installation
 
 Make sure you have the latest version of Python installed.
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/hungtn21/GoiKanji-Learning_App.git
 ```
 
 ```bash
