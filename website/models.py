@@ -10,7 +10,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(100), nullable=False)
-    created_at = db.Column(db.DateTime,server_default=func.now())
+    created_at = db.Column(db.DateTime,default=func.now())
     last_login = db.Column(db.DateTime,default=func.now())
 
     progress = db.relationship('UserProgress', backref='user', lazy=True)
