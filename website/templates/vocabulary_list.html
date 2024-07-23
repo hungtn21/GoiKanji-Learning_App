@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách Bài học{% endblock %}
+
+{% block content %}
+<h1 align="center">Danh sách bài học {{ level|upper }}</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tiêu đề bài học</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for lesson in lessons %}
+        <tr>
+            <td>{{ lesson.title }}</td>
+            <td>
+                <a href="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" class="btn btn-primary">Học</a>
+                <a href="{{ url_for('views.take_test', lesson_id=lesson.lesson_id) }}" class="btn btn-secondary">Kiểm tra</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

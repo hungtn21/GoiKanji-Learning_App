@@ -29,18 +29,18 @@
       </button>
       <div class="collapse navbar-collapse" id="navbar">
         <div class="navbar-nav">
-          {% if user.is_authenticated %}
+          {% if current_user.is_authenticated %}
           <a class="nav-item nav-link" id="home" href="/">Home</a>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Từ vựng
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="/tuvung-n1">N1</a>
-                <a class="dropdown-item" href="/tuvung-n2">N2</a>
-                <a class="dropdown-item" href="/tuvung-n3">N3</a>
-                <a class="dropdown-item" href="/tuvung-n4">N4</a>
-                <a class="dropdown-item" href="/tuvung-n5">N5</a>
+                <a class="dropdown-item" href="{{ url_for('views.vocabulary_by_level', level='n1') }}">N1</a>
+                <a class="dropdown-item" href="{{ url_for('views.vocabulary_by_level', level='n2') }}">N2</a>
+                <a class="dropdown-item" href="{{ url_for('views.vocabulary_by_level', level='n3') }}">N3</a>
+                <a class="dropdown-item" href="{{ url_for('views.vocabulary_by_level', level='n4') }}">N4</a>
+                <a class="dropdown-item" href="{{ url_for('views.vocabulary_by_level', level='n5') }}">N5</a>
             </div>
         </li>
         <li class="nav-item dropdown">

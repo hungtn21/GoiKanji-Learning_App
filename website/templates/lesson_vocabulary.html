@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ lesson.title }}</h1>
+<p>{{ lesson.description }}</p>
+
+<!-- Hiển thị từ vựng hiện tại -->
+<div>
+    {% if current_vocabulary %}
+        <h2>Vocabulary</h2>
+        <p><strong>Word:</strong> {{ current_vocabulary.word }}</p>
+        <p><strong>Hiragana:</strong> {{ current_vocabulary.hiragana }}</p>
+        <p><strong>Meaning:</strong> {{ current_vocabulary.meaning }}</p>
+        <p><strong>Example Sentence:</strong> {{ current_vocabulary.example_sentence }}</p>
+    {% else %}
+        <p>No vocabulary found for this lesson.</p>
+    {% endif %}
+</div>
+
+<!-- Form điều hướng -->
+<form action="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" method="post">
+    <input type="hidden" name="index" value="{{ current_index }}">
+    <input type="hidden" name="lesson_id" value="{{ lesson.lesson_id }}">
+    <button type="submit" name="action" value="prev" class="btn btn-primary" {% if current_index == 0 %}disabled{% endif %}>Previous</button>
+    <button type="submit" name="action" value="next" class="btn btn-primary" {% if current_index == total_vocabularies - 1 %}disabled{% endif %}>Next</button>
+</form>
+{% endblock %}

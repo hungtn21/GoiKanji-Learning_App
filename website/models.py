@@ -11,97 +11,69 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime,default=func.now())
-    last_login = db.Column(db.DateTime,default=func.now())
-
     progress = db.relationship('UserProgress', backref='user', lazy=True)
-    community_posts = db.relationship('CommunityPost', backref='user', lazy=True)
     comments = db.relationship('Comment', backref='user', lazy=True) 
-
-class Level(db.Model):
-    __tablename__ = 'Level'
-    level_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(10), nullable=False)
-
-    lessons = db.relationship('Lesson', backref='level', lazy=True)
 
 class Lesson(db.Model):
     __tablename__ = 'Lesson'
-    lesson_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    level_id = db.Column(db.Integer, db.ForeignKey('Level.level_id'))
+    lesson_id = db.Column(db.Integer, primary_key=True)
+    level_id = db.Column(db.Integer, nullable=True)
     title = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.Text)
-
+    description = db.Column(db.Text, nullable=True)
     vocabulary = db.relationship('Vocabulary', backref='lesson', lazy=True)
-    tests = db.relationship('Test', backref='lesson', lazy=True)
+    kanji = db.relationship('Kanji', backref='lesson', lazy=True)
+    questions = db.relationship('Question', backref='lesson', lazy=True)
     progress = db.relationship('UserProgress', backref='lesson', lazy=True)
 
 class Vocabulary(db.Model):
     __tablename__ = 'Vocabulary'
-    vocab_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    lesson_id = db.Column(db.Integer, db.ForeignKey('Lesson.lesson_id'))
+    vocab_id = db.Column(db.Integer, primary_key=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('Lesson.lesson_id'), nullable=True)
+    hiragana = db.Column(db.Text, nullable=False)
     word = db.Column(db.String(50), nullable=False)
-    kanji = db.Column(db.String(50))
     meaning = db.Column(db.Text, nullable=False)
-    example_sentence = db.Column(db.Text)
-
-class Test(db.Model):
-    __tablename__ = 'Test'
-    test_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    lesson_id = db.Column(db.Integer, db.ForeignKey('Lesson.lesson_id'))
-    created_at = db.Column(db.DateTime)
-
-    questions = db.relationship('Question', backref='test', lazy=True)
+    example_sentence = db.Column(db.Text, nullable=True)
+    comments = db.relationship('Comment', backref='vocabulary', lazy=True)
 
 class Question(db.Model):
     __tablename__ = 'Question'
-    question_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    test_id = db.Column(db.Integer, db.ForeignKey('Test.test_id'))
-    question_type = db.Column(db.Enum('multiple_choice', 'essay', name='question_type_enum'), nullable=False)
-    content = db.Column(db.Text, nullable=False)
+    question_id = db.Column(db.Integer, primary_key=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('Lesson.lesson_id'), nullable=False)
+    type = db.Column(db.Integer, nullable=False)
+    question_content = db.Column(db.Text, nullable=False)
+    option_1 = db.Column(db.Text, nullable=False)
+    option_2 = db.Column(db.Text, nullable=False)
+    option_3 = db.Column(db.Text, nullable=False)
+    option_4 = db.Column(db.Text, nullable=False)
+    correct_answer = db.Column(db.Text, nullable=False)
 
-    choices = db.relationship('Choice', backref='question', lazy=True)
-
-class Choice(db.Model):
-    __tablename__ = 'Choice'
-    choice_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    question_id = db.Column(db.Integer, db.ForeignKey('Question.question_id'))
-    content = db.Column(db.Text, nullable=False)
-    is_correct = db.Column(db.Boolean, nullable=False)
+class Kanji(db.Model):
+    __tablename__ = 'Kanji'
+    kanji_id = db.Column(db.BigInteger, primary_key=True)
+    lesson_id = db.Column(db.BigInteger, db.ForeignKey('Lesson.lesson_id'), nullable=False)
+    kanji = db.Column(db.String(20), nullable=False)
+    photo = db.Column(db.Text, nullable=False)
+    on = db.Column(db.Text, nullable=False)
+    kun = db.Column(db.Text, nullable=False)
+    meaning = db.Column(db.Text, nullable=False)
+    example_sentence = db.Column(db.Text, nullable=False)
+    comments = db.relationship('Comment', backref='kanji', lazy=True)
 
 class UserProgress(db.Model):
     __tablename__ = 'UserProgress'
     progress_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id = db.Column(db.Integer, db.ForeignKey('User.id'))
     lesson_id = db.Column(db.Integer, db.ForeignKey('Lesson.lesson_id'))
-    last_reviewed = db.Column(db.DateTime)
+    times_reviewed = db.Column(db.Integer)
     next_review = db.Column(db.DateTime)
 
-class CommunityPost(db.Model):
-    __tablename__ = 'CommunityPost'
-    post_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    id = db.Column(db.Integer, db.ForeignKey('User.id'))
-    content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime)
-
-    comments = db.relationship('Comment', backref='post', lazy=True)
 
 class Comment(db.Model):
     __tablename__ = 'Comment'
-    comment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    post_id = db.Column(db.Integer, db.ForeignKey('CommunityPost.post_id'))
-    id = db.Column(db.Integer, db.ForeignKey('User.id'))
+    comment_id = db.Column(db.Integer, primary_key=True)
+    word_id = db.Column(db.Integer, db.ForeignKey('Vocabulary.vocab_id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=True)
     content = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime)
-    
-# class User(db.Model, UserMixin):
-#     id = db.Column(db.Integer, primary_key=True)
-#     email = db.Column(db.String(150), unique=True)
-#     password = db.Column(db.String(150))
-#     first_name = db.Column(db.String(150))
-#     notes = db.relationship('Note')
+    created_at = db.Column(db.DateTime, default=func.now())
+    kanji_id = db.Column(db.BigInteger, db.ForeignKey('Kanji.kanji_id'), nullable=True)
 
-# class Note(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     data = db.Column(db.String(10000))
-#     date = db.Column(db.DateTime(timezone=True), default=func.now())
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))

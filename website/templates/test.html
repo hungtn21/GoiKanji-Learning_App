@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Kiểm tra{% endblock %}
+
+{% block content %}
+<h1 align="center">Câu hỏi Kiểm tra</h1>
+<form method="POST" action="{{ url_for('submit_test') }}">
+    {% for question in questions %}
+    <div class="form-group">
+        <label>{{ question.question_content }}</label>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="question_{{ question.question_id }}" value="option_1">
+            <label class="form-check-label">{{ question.option_1 }}</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="question_{{ question.question_id }}" value="option_2">
+            <label class="form-check-label">{{ question.option_2 }}</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="question_{{ question.question_id }}" value="option_3">
+            <label class="form-check-label">{{ question.option_3 }}</label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="question_{{ question.question_id }}" value="option_4">
+            <label class="form-check-label">{{ question.option_4 }}</label>
+        </div>
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Nộp bài</button>
+</form>
+{% endblock %}
