@@ -48,11 +48,11 @@
               Kanji
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="/kanji-n1">N1</a>
-              <a class="dropdown-item" href="/kanji-n2">N2</a>
-              <a class="dropdown-item" href="/kanji-n3">N3</a>
-              <a class="dropdown-item" href="/kanji-n4">N4</a>
-              <a class="dropdown-item" href="/kanji-n5">N5</a>
+              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n1') }}">N1</a>
+              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n2') }}">N2</a>
+              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n3') }}">N3</a>
+              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n4') }}">N4</a>
+              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n5') }}">N5</a>
           </div>
       </li>
           <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
@@ -99,17 +99,5 @@
       crossorigin="anonymous"
     ></script>
 
-{% block javascript %}
-    <script type="text/javascript">
-      function deleteNote(noteId) {
-  fetch("/delete-note", {
-    method: "POST",
-    body: JSON.stringify({ noteId: noteId }),
-  }).then((_res) => {
-    window.location.href = "/";
-  });
-  }
-</script>
-{% endblock %}
   </body>
 </html>

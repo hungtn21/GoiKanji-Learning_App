@@ -70,10 +70,9 @@ class UserProgress(db.Model):
 
 class Comment(db.Model):
     __tablename__ = 'Comment'
-    comment_id = db.Column(db.Integer, primary_key=True)
+    comment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     word_id = db.Column(db.Integer, db.ForeignKey('Vocabulary.vocab_id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=True)
+    id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=True)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=func.now())
     kanji_id = db.Column(db.BigInteger, db.ForeignKey('Kanji.kanji_id'), nullable=True)
-

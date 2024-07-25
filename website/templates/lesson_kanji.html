@@ -4,25 +4,26 @@
 <h1>{{ lesson.title }}</h1>
 <p>{{ lesson.description }}</p>
 
-<!-- Hiển thị từ vựng hiện tại -->
+<!-- Hiển thị kanji hiện tại -->
 <div>
-    {% if current_vocabulary %}
-        <h2>Vocabulary</h2>
-        <p><strong>Word:</strong> {{ current_vocabulary.word }}</p>
-        <p><strong>Hiragana:</strong> {{ current_vocabulary.hiragana }}</p>
-        <p><strong>Meaning:</strong> {{ current_vocabulary.meaning }}</p>
-        <p><strong>Example Sentence:</strong> {{ current_vocabulary.example_sentence }}</p>
+    {% if current_kanji %}
+        <h2>Kanji</h2>
+        <p><strong>Kanji:</strong> {{ current_kanji.kanji }}</p>
+        <p><strong>Âm on:</strong> {{ current_kanji.on }}</p>
+        <p><strong>Âm kun:</strong> {{ current_kanji.kun }}</p>
+        <p><strong>Nghĩa:</strong> {{ current_kanji.meaning }}</p>
+        <p><strong>Example Sentence:</strong> {{ current_kanji.example_sentence }}</p>
     {% else %}
-        <p>No vocabulary found for this lesson.</p>
+        <p>No current_kanji found for this lesson.</p>
     {% endif %}
 </div>
 
 <!-- Form điều hướng -->
-<form action="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" method="post">
+<form action="{{ url_for('views.lesson_kanji', lesson_id=lesson.lesson_id) }}" method="post">
     <input type="hidden" name="index" value="{{ current_index }}">
     <input type="hidden" name="lesson_id" value="{{ lesson.lesson_id }}">
     <button type="submit" name="action" value="prev" class="btn btn-primary" {% if current_index == 0 %}disabled{% endif %}>Previous</button>
-    <button type="submit" name="action" value="next" class="btn btn-primary" {% if current_index == total_vocabularies - 1 %}disabled{% endif %}>Next</button>
+    <button type="submit" name="action" value="next" class="btn btn-primary" {% if current_index == total_kanji - 1 %}disabled{% endif %}>Next</button>
 </form>
 
 <!-- Hiển thị comment -->
@@ -43,10 +44,10 @@
 </div>
 
 <!-- Form thêm comment -->
-{% if current_vocabulary %}
+{% if current_kanji %}
     <div>
         <h3>Add Comment</h3>
-        <form action="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" method="post">
+        <form action="{{ url_for('views.lesson_kanji', lesson_id=lesson.lesson_id) }}" method="post">
             <input type="hidden" name="index" value="{{ current_index }}">
             <input type="hidden" name="lesson_id" value="{{ lesson.lesson_id }}">
             <textarea name="comment_content" rows="4" cols="50" required></textarea>
