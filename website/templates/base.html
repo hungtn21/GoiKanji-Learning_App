@@ -16,6 +16,71 @@
     />
 
     <title>{% block title %}Home{% endblock %}</title>
+    <style>
+      .navbar {
+          transition: top 0.3s ease;
+      }
+
+      .hidden-navbar {
+          top: -60px;
+      }
+
+      .notification-container {
+          position: fixed;
+          top: 5px;
+          right: 100px;
+          z-index: 1000;
+          transition: opacity 0.3s ease;
+      }
+
+      .notification-bell {
+          font-size: 2rem;
+          cursor: pointer;
+          position: relative;
+      }
+
+      .notification-dot {
+          position: absolute;
+          top: -5px;
+          right: -10px;
+          background-color: red;
+          border-radius: 50%;
+          width: 10px;
+          height: 10px;
+          display: none;
+      }
+
+      .notification-list {
+          display: none;
+          position: absolute;
+          top: 2rem;
+          right: 0;
+          background-color: white;
+          border: 1px solid #ccc;
+          padding: 10px;
+          width: 400px;
+          max-height: 200px;
+          overflow-y: auto;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+          z-index: 1000;
+      }
+
+      .notification-list.active {
+          display: block;
+      }
+
+      .notification-item {
+          margin-bottom: 10px;
+          padding: 5px;
+          border-radius: 4px;
+          background-color: #f9f9f9;
+          font-family: 'Arial', sans-serif;
+          color: #333;
+      }
+      .profile-button {
+            margin-right: 20px; /* Tạo khoảng cách giữa nút hồ sơ và chuông thông báo */
+        }
+  </style>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -48,11 +113,11 @@
               Kanji
           </a>
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n1') }}">N1</a>
-              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n2') }}">N2</a>
-              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n3') }}">N3</a>
-              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n4') }}">N4</a>
-              <a class="dropdown-item" href="{{ url_for('views.kanji_by_level', level='n5') }}">N5</a>
+              <a class="dropdown-item" href="/kanji-n1">N1</a>
+              <a class="dropdown-item" href="/kanji-n2">N2</a>
+              <a class="dropdown-item" href="/kanji-n3">N3</a>
+              <a class="dropdown-item" href="/kanji-n4">N4</a>
+              <a class="dropdown-item" href="/kanji-n5">N5</a>
           </div>
       </li>
           <a class="nav-item nav-link" id="logout" href="/logout">Logout</a>
@@ -61,27 +126,43 @@
           <a class="nav-item nav-link" id="signUp" href="/sign-up">Sign Up</a>
           {% endif %}
         </div>
+        {% if current_user.is_authenticated %}
+        <div class="ml-auto">
+          <a class="btn btn-primary" id="profile" href="{{ url_for('views.profile') }}">Profile</a>
+        </div>
+        {% endif %}
       </div>
     </nav>
 
     {% with messages = get_flashed_messages(with_categories=true) %} {% if
     messages %} {% for category, message in messages %} {% if category ==
     'error' %}
-    <div class="alert alert-danger alter-dismissable fade show" role="alert">
+    <div class="alert alert-danger alert-dismissable fade show" role="alert">
       {{ message }}
       <button type="button" class="close" data-dismiss="alert">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     {% else %}
-    <div class="alert alert-success alter-dismissable fade show" role="alert">
+    <div class="alert alert-success alert-dismissable fade show" role="alert">
       {{ message }}
       <button type="button" class="close" data-dismiss="alert">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
     {% endif %} {% endfor %} {% endif %} {% endwith %}
-
+    {% if current_user.is_authenticated %}
+    <!-- chuông thông báo -->
+    <div class="notification-container" id="notification-container">
+      <div class="notification-bell" onclick="toggleNotifications()">
+          🔔
+          <span id="notification-dot" class="notification-dot"></span>
+      </div>
+      <div class="notification-list" id="notification-list">
+          
+      </div>
+  </div>
+  {% endif %}
     <div class="container">{% block content %} {% endblock %}</div>
     <script
       src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
@@ -98,6 +179,102 @@
       integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
       crossorigin="anonymous"
     ></script>
-
+    <script>
+      let notificationsVisible = false;
+      let notifications = JSON.parse(localStorage.getItem('notifications')) || []; // Mảng hai chiều
+      let currentUserId = "{{ current_user.id }}"; // Lấy ID của người dùng hiện tại
+      let lastScrollTop = 0; // Biến để lưu vị trí cuộn trước đó
+  
+      function toggleNotifications() {
+          const notificationList = document.getElementById('notification-list');
+          const notificationDot = document.getElementById('notification-dot');
+  
+          notificationsVisible = !notificationsVisible;
+          if (notificationsVisible) {
+              notificationList.classList.add('active');
+              notificationDot.style.display = 'none'; // Ẩn chấm đỏ khi xem thông báo
+              displayNotifications(currentUserId); // Hiện thông báo cho người dùng hiện tại
+          } else {
+              notificationList.classList.remove('active');
+          }
+      }
+  
+      function fetchNotifications(userId) {
+          fetch(`/update_progress/${userId}`, { method: 'POST' })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.status === "success") {
+                      const newNotifications = data.notifications;
+  
+                      // Kiểm tra xem user_id đã tồn tại trong mảng chưa
+                      const userNotifications = notifications.find(n => n[0] === userId);
+                      if (userNotifications) {
+                          userNotifications[1] = [...newNotifications, ...userNotifications[1]]; // Thêm thông báo mới vào
+                      } else {
+                          notifications.push([userId, newNotifications]); // Tạo mới nếu chưa tồn tại
+                      }
+  
+                      // Giới hạn số lượng thông báo lưu trữ
+                      const currentUserNotifications = notifications.find(n => n[0] === userId)[1];
+                      if (currentUserNotifications.length > 30) {
+                          currentUserNotifications.splice(0, currentUserNotifications.length - 30); // Giữ lại 30 thông báo mới nhất
+                      }
+  
+                      // Hiện chấm đỏ nếu có thông báo mới cho user hiện tại
+                      if (newNotifications.length > 0 && userNotifications) {
+                          document.getElementById('notification-dot').style.display = 'block';
+                      } else {
+                          document.getElementById('notification-dot').style.display = 'none'; // Ẩn chấm đỏ nếu không có thông báo mới
+                      }
+  
+                      localStorage.setItem('notifications', JSON.stringify(notifications));
+                      displayNotifications(userId); // Hiện thông báo cho người dùng đã chọn
+                  }
+              })
+              .catch(error => console.error('Error fetching notifications:', error));
+      }
+  
+      function displayNotifications(userId) {
+          const notificationList = document.getElementById('notification-list');
+          notificationList.innerHTML = '';
+  
+          // Lọc thông báo của user hiện tại
+          const currentUserNotifications = notifications.find(n => n[0] === userId);
+          const notificationsToDisplay = currentUserNotifications ? currentUserNotifications[1] : [];
+  
+          notificationsToDisplay.forEach(notification => {
+              const div = document.createElement('div');
+              div.classList.add('notification-item');
+              div.textContent = notification;
+              notificationList.appendChild(div);
+          });
+      }
+  
+      window.onload = function() {
+          fetchNotifications(currentUserId); // Lấy thông báo cho người dùng hiện tại
+          displayNotifications(currentUserId); // Hiện thông báo cho người dùng hiện tại
+      };
+  
+      setInterval(() => fetchNotifications(currentUserId), 60000); // Cập nhật thông báo mỗi phút
+  
+      // Xử lý sự kiện cuộn trang
+      window.addEventListener('scroll', function() {
+          const navbar = document.getElementById('navbar');
+          const notificationContainer = document.getElementById('notification-container');
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+  
+          if (scrollTop > lastScrollTop) {
+              // Đang cuộn xuống
+              navbar.classList.add('hidden-navbar'); // Ẩn thanh điều hướng
+              notificationContainer.style.opacity = '0'; // Ẩn chuông thông báo
+          } else {
+              // Đang cuộn lên
+              navbar.classList.remove('hidden-navbar'); // Hiện thanh điều hướng
+              notificationContainer.style.opacity = '1'; // Hiện chuông thông báo
+          }
+  
+          lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // Cập nhật lastScrollTop
+      });
+  </script>
   </body>
 </html>

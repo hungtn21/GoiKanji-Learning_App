@@ -1,14 +1,43 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from .models import User, Lesson, Vocabulary, Question, Comment, Kanji
+from flask import Blueprint, jsonify, flash, render_template, request, redirect, url_for
+from .models import User, Lesson, Vocabulary, Question, Comment, UserProgress, Kanji,Todo
 from flask_login import login_required, current_user
 from . import db
+from datetime import datetime, timedelta
+import random
 
 views = Blueprint('views', __name__)
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    return render_template("home.html", user=current_user)
+    if request.method == 'POST':
+        todo_title = request.form.get('todo_title')
+        if todo_title:
+            new_todo = Todo(title=todo_title, user_id=current_user.id)
+            db.session.add(new_todo)
+            db.session.commit()
+            return redirect(url_for('views.home'))
+
+    todos = Todo.query.filter_by(user_id=current_user.id).all()
+    return render_template("home.html", todos=todos, user=current_user)
+
+@views.route('/toggle_todo/<int:todo_id>/', methods=['POST'])
+@login_required
+def toggle_todo(todo_id):
+    todo = Todo.query.get(todo_id)
+    if todo and todo.user_id == current_user.id:
+        todo.completed = not todo.completed
+        db.session.commit()
+    return '', 204  # Trả về mã trạng thái 204 No Content
+
+@views.route('/delete_todo/<int:todo_id>/', methods=['POST'])
+@login_required
+def delete_todo(todo_id):
+    todo = Todo.query.get(todo_id)
+    if todo and todo.user_id == current_user.id:
+        db.session.delete(todo)
+        db.session.commit()
+    return '', 204  # Trả về mã trạng thái 204 No Content
 
 @views.route('/tuvung-<level>', methods=['GET'])
 @login_required
@@ -25,7 +54,6 @@ def vocabulary_by_level(level):
         return redirect(url_for('views.home'))
     lessons = Lesson.query.filter_by(level_id=level_id).all()
     return render_template('vocabulary_list.html', lessons=lessons, level=level)
-
 @views.route('/kanji-<level>', methods=['GET'])
 @login_required
 def kanji_by_level(level):
@@ -41,7 +69,6 @@ def kanji_by_level(level):
         return redirect(url_for('views.home'))
     lessons = Lesson.query.filter_by(level_id=level_id).all()
     return render_template('kanji_list.html', lessons=lessons, level=level)
-
 
 @views.route('/lesson/<int:lesson_id>/learn', methods=['GET', 'POST'])
 @login_required
@@ -97,26 +124,16 @@ def lesson_kanji(lesson_id):
     total_kanji = len(kanji_list)
     current_index = int(request.form.get('index', 0))
 
-    def get_next_comment_id():
-        last_comment = Comment.query.order_by(Comment.comment_id.desc()).first()
-        if last_comment:
-            return last_comment.comment_id + 1
-        return 1
-
     if request.method == 'POST':
         action = request.form.get('action')
-        if action == 'next':
-            if current_index < total_kanji - 1:
-                current_index += 1
-        elif action == 'prev':
-            if current_index > 0:
-                current_index -= 1
+        if action == 'next' and current_index < total_kanji - 1:
+            current_index += 1
+        elif action == 'prev' and current_index > 0:
+            current_index -= 1
         elif action == 'add_comment':
             comment_content = request.form.get('comment_content')
             if comment_content:
-                next_comment_id = get_next_comment_id()
                 new_comment = Comment(
-                    comment_id=next_comment_id,
                     kanji_id=kanji_list[current_index].kanji_id,
                     id=current_user.id,
                     content=comment_content
@@ -138,11 +155,94 @@ def lesson_kanji(lesson_id):
 @views.route('/lesson/<int:lesson_id>/test', methods=['GET'])
 @login_required
 def take_test(lesson_id):
-    print(lesson_id)
+    # Lấy tất cả câu hỏi cho bài học cụ thể
     questions = Question.query.filter_by(lesson_id=lesson_id).all()
-    return render_template('test.html', questions=questions)
+    
+    # Đảo ngẫu nhiên thứ tự câu hỏi
+    random.shuffle(questions)
+    
+    # Render trang kiểm tra với danh sách câu hỏi
+    return render_template('test.html', questions=questions, lesson_id=lesson_id)
 
-@views.route('/submit-test', methods=['POST'])
+@views.route('/submit_test', methods=['POST'])
 @login_required
 def submit_test():
+    lesson_id = request.form.get('lesson_id')
+    current_time = datetime.now()
+
+    # Tìm kiếm tiến trình học tập của người dùng
+    user_progress = UserProgress.query.filter_by(id=current_user.id, lesson_id=lesson_id).first()
+
+    # Cập nhật hoặc tạo mới tiến trình học tập
+    if user_progress:
+        user_progress.times_reviewed += 1
+        user_progress.next_review = current_time + timedelta(minutes=user_progress.times_reviewed * 2)
+    else:
+        user_progress = UserProgress(
+            id=current_user.id,
+            lesson_id=lesson_id,
+            times_reviewed=1,
+            next_review=current_time + timedelta(minutes=1)
+        )
+        db.session.add(user_progress)
+
+    db.session.commit()
+
+    # Đếm số câu đúng
+    correct_answers = sum(
+        1 for question in Question.query.filter_by(lesson_id=lesson_id).all()
+        if request.form.get(f'question_{question.question_id}') == question.correct_answer
+    )
+    
+    total_questions = Question.query.filter_by(lesson_id=lesson_id).count()
+
+    # Tính điểm
+    score = f"{correct_answers}/{total_questions}"
+    
+    # Tính tỷ lệ phần trăm
+    percentage = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+
+    # Gửi thông báo cho người dùng
+    message = ''
+    if percentage >= 80:
+        message = f'Wonderful! You passed the exam. Your score: {score}.'
+    else:
+        message = f'You should review this lesson. Your score: {score}.'
+    
+    flash(message, 'success' if percentage >= 80 else 'danger')
+
+    # Chuyển hướng về trang chủ
     return redirect(url_for('views.home'))
+
+
+
+@views.route('/update_progress/<int:user_id>', methods=['POST'])
+@login_required
+def update_progress(user_id):
+    current_time = datetime.now()
+    user_progresses = UserProgress.query.filter_by(id=user_id).all()
+    notifications = []
+
+    for progress in user_progresses:
+        if current_time >= progress.next_review:
+            notifications.append(f"{current_time.strftime('%Y-%m-%d %H:%M:%S')}: It's time to review lesson {progress.lesson_id}.")
+
+    db.session.commit()
+    return jsonify({"status": "success", "notifications": notifications})
+
+@views.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    user = current_user
+    user_progress = UserProgress.query.filter_by(id=user.id).all()
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        dob = request.form.get('dob')
+        if name:
+            user.name = name
+        if dob:
+            user.dob = datetime.strptime(dob, '%Y-%m-%d')
+        db.session.commit()
+        return redirect(url_for('views.profile'))
+    return render_template('profile.html', user=user, userprogress=user_progress)

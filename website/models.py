@@ -7,10 +7,12 @@ from datetime import datetime
 class User(db.Model, UserMixin):
     __tablename__ = 'User'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=True)  
+    dob = db.Column(db.Date, nullable=True,default=func.now()) 
     username = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(100), nullable=False)
-    created_at = db.Column(db.DateTime,default=func.now())
+    created_at = db.Column(db.DateTime,default=func.now())         
     progress = db.relationship('UserProgress', backref='user', lazy=True)
     comments = db.relationship('Comment', backref='user', lazy=True) 
 
@@ -76,3 +78,12 @@ class Comment(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=func.now())
     kanji_id = db.Column(db.BigInteger, db.ForeignKey('Kanji.kanji_id'), nullable=True)
+
+class Todo(db.Model):
+    __tablename__ = 'Todo'
+    todo_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(200), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=func.now())
+    updated_at = db.Column(db.DateTime, default=func.now(), onupdate=func.now())

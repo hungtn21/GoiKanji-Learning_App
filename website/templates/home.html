@@ -1,12 +1,125 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
-  %}
-  <h1 align="center">Kanji - Goi Learning App</h1>
-  <!-- <form method="POST">
-    <textarea name="note" id="note" class="form-control"></textarea>
-    <br />
-    <div align="center">
-      <button type="submit" class="btn btn-primary">Add Note</button>
-    </div>
-  </form> -->
-  {% endblock %}
-  
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #93f1ff; /* Màu nền cho toàn bộ trang */
+    }
+    .header {
+        text-align: center;
+        margin: 20px 0;
+    }
+    .header h1 {
+        font-size: 36px;
+        font-weight: bold;
+        color: #000000;
+        text-shadow: 5px 5px 7px rgba(214, 14, 14, 0.1);
+        animation: bounce 2.5s infinite; /* Thêm hiệu ứng nhảy nhót */
+        transition: transform 0.3s, color 0.3s;
+    }
+    .header h1:hover {
+        transform: scale(1.05);
+        color: #e79860; 
+    }
+
+    /* Định nghĩa animation nhảy nhót */
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+        }
+        40% {
+            transform: translateY(-10px);
+        }
+        60% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .todo-container {
+        margin-top: 20px;
+        background-color: #ffd3b9d4;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .todo-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        background-color: #ffffff;
+        transition: background-color 0.3s;
+    }
+    .list-group-item:hover {
+        background-color: #44e903;
+    }
+    .btn-danger {
+        margin-left: 10px;
+    }
+    .form-control {
+        border-radius: 5px;
+    }
+    .btn-primary {
+        border-radius: 5px;
+    }
+</style>
+
+<div class="header">
+    <h1>Study Plan & Note</h1>
+</div>
+
+<div class="container todo-container">
+    <!-- Form để thêm todo -->
+    <form method="POST" class="mt-4">
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+        <div class="input-group">
+            <input type="text" name="todo_title" id="todo_title" class="form-control" placeholder="Add a new todo" required />
+            <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">Add Note</button>
+            </div>
+        </div>
+    </form>
+
+    <h2 class="mt-4 text-center">Your Note List</h2>
+    <ul class="list-group">
+        {% for todo in todos %}
+            <li class="list-group-item">
+                <div>
+                    <input type="checkbox" {% if todo.completed %}checked{% endif %} onclick="toggleTodo({{ todo.todo_id }})">
+                    {{ todo.title }}
+                </div>
+                <button onclick="deleteTodo({{ todo.todo_id }})" class="btn btn-danger btn-sm">Delete</button>
+            </li>
+        {% else %}
+            <li class="list-group-item">No notes found.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+function toggleTodo(todoId) {
+    fetch(`/toggle_todo/${todoId}/`, { 
+        method: 'POST', 
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' } 
+    });
+}
+
+function deleteTodo(todoId) {
+    fetch(`/delete_todo/${todoId}/`, { 
+        method: 'POST', 
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' } 
+    })
+    .then(() => location.reload());
+}
+</script>
+{% endblock %}
