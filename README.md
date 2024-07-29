@@ -1,8 +1,10 @@
 This project is developed by the HUST - SIT student team as part of the online session of gPBL (global Project-Based Learning) 2024. Our project is designed to help you learn vocabulary and Kanji effectively through three main solutions:
 
 **1. Structured Learning Materials:** We provide a systematized library of materials categorized by proficiency levels, making it easy to find content that matches your current level.
+
 **2. Spaced Repetition Method:** To ensure long-term retention, we employ the Spaced Repetition method combined with quizzes. This approach helps you review vocabulary more effectively.
-**3. Community Interaction: **You can share your mnemonic techniques through comments and receive assistance from fellow learners.
+
+**3. Community Interaction:** You can share your mnemonic techniques through comments and receive assistance from fellow learners.
 
 **Instruction**
 
