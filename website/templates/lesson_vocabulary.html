@@ -1,57 +1,84 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ lesson.title }}</h1>
-<p>{{ lesson.description }}</p>
-
-<!-- Hiển thị từ vựng hiện tại -->
-<div>
-    {% if current_vocabulary %}
-        <h2>Vocabulary</h2>
-        <p><strong>Word:</strong> {{ current_vocabulary.word }}</p>
-        <p><strong>Hiragana:</strong> {{ current_vocabulary.hiragana }}</p>
-        <p><strong>Meaning:</strong> {{ current_vocabulary.meaning }}</p>
-        <p><strong>Example Sentence:</strong> {{ current_vocabulary.example_sentence }}</p>
-    {% else %}
-        <p>No vocabulary found for this lesson.</p>
-    {% endif %}
-</div>
-
-<!-- Form điều hướng -->
-<form action="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" method="post">
-    <input type="hidden" name="index" value="{{ current_index }}">
-    <input type="hidden" name="lesson_id" value="{{ lesson.lesson_id }}">
-    <button type="submit" name="action" value="prev" class="btn btn-primary" {% if current_index == 0 %}disabled{% endif %}>Previous</button>
-    <button type="submit" name="action" value="next" class="btn btn-primary" {% if current_index == total_vocabularies - 1 %}disabled{% endif %}>Next</button>
-</form>
-
-<!-- Hiển thị comment -->
-<div>
-    <h3>Comments</h3>
-    <ul>
-        {% for comment in comments %}
-            <li>
-                <strong>{{ comment.user.username }}:</strong> {{ comment.content }}
-                {% if comment.created_at %}
-                    <p><em>Posted at: {{ comment.created_at.strftime('%d/%m/%Y %H:%M:%S') }}</em></p>
-                {% else %}
-                    <p><em>Posted at: Time not available</em></p>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
-</div>
-
-<!-- Form thêm comment -->
-{% if current_vocabulary %}
-    <div>
-        <h3>Add Comment</h3>
-        <form action="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" method="post">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ lesson.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='flipcard.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ lesson.title }}</h1>
+        <form action="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" method="post" class="navigation">
             <input type="hidden" name="index" value="{{ current_index }}">
             <input type="hidden" name="lesson_id" value="{{ lesson.lesson_id }}">
-            <textarea name="comment_content" rows="4" cols="50" required></textarea>
-            <button type="submit" name="action" value="add_comment" class="btn btn-primary">Submit Comment</button>
+            <button type="submit" name="action" value="prev" class="btn btn-primary" {% if current_index == 0 %}disabled{% endif %}>Previous</button>
+        </form>
+
+        <div class="card">
+            <div class="card__inner">
+                <div class="card__face card__face--front">
+                    {% if current_vocabulary %}
+                        <h2><strong>{{ current_vocabulary.word }}</strong></h2>
+                    {% else %}
+                        <h2>No vocabulary found</h2>
+                    {% endif %}
+                </div>
+                <div class="card__face card__face--back">
+                    <div class="card__content">
+                        <div class="card__body">
+                            {% if current_vocabulary %}
+                                <p><strong>Hiragana:</strong> {{ current_vocabulary.hiragana }}</p>
+                                <p><strong>Meaning:</strong> {{ current_vocabulary.meaning }}</p>
+                                <p><strong>Example Sentence:</strong> {{ current_vocabulary.example_sentence }}</p>
+                            {% else %}
+                                <p>No vocabulary found for this lesson.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form action="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" method="post" class="navigation">
+            <input type="hidden" name="index" value="{{ current_index }}">
+            <input type="hidden" name="lesson_id" value="{{ lesson.lesson_id }}">
+            <button type="submit" name="action" value="next" class="btn btn-primary" {% if current_index == total_vocabularies - 1 %}disabled{% endif %}>Next</button>
         </form>
     </div>
-{% endif %}
+
+    <!-- Hiển thị comment -->
+    <div class="comments-container">
+        <h3>Comments</h3>
+        <div class="comments-box">
+            <ul>
+                {% for comment in comments %}
+                    <li>
+                        <strong>{{ comment.user.username }}:</strong> {{ comment.content }}
+                        {% if comment.created_at %}
+                            <p><em>Posted at: {{ comment.created_at.strftime('%d/%m/%Y %H:%M:%S') }}</em></p>
+                        {% else %}
+                            <p><em>Posted at: Time not available</em></p>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Form thêm comment -->
+        {% if current_vocabulary %}
+            <div class="add-comment">
+                <h3>Add Comment</h3>
+                <form action="{{ url_for('views.lesson_vocabulary', lesson_id=lesson.lesson_id) }}" method="post">
+                    <input type="hidden" name="index" value="{{ current_index }}">
+                    <input type="hidden" name="lesson_id" value="{{ lesson.lesson_id }}">
+                    <textarea name="comment_content" rows="4" cols="50" required></textarea>
+                    <button type="submit" name="action" value="add_comment" class="btn btn-primary">Submit Comment</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
 {% endblock %}
