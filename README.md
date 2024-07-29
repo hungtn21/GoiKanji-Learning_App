@@ -35,7 +35,4 @@ with the following syntax:
 Finally, try running the `main.py` file to use the program.
 
 Demo Video:
-
-```
-    https://drive.google.com/file/d/1KFPHlBEIqW6jflmphGkkFVQXISulyADR/view?usp=sharing
-```
+[Demo Video of GoiKanji-Learning-App](https://drive.google.com/file/d/1KFPHlBEIqW6jflmphGkkFVQXISulyADR/view?usp=sharing)
