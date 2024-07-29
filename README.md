@@ -1,23 +1,32 @@
-# Goi - Kanji Learning App
+Make sure that the Python you are using is the latest version.
 
-## Setup & Installation
-
-Make sure you have the latest version of Python installed.
-
-```bash
-git clone https://github.com/hungtn21/GoiKanji-Learning_App.git
+Please install the following frameworks and packages before you test the program:
 ```
+    pip install Flask
 
-```bash
-pip install -r requirements.txt
+    pip install Flask-SQLAlchemy
+    
+    pip install psycopg2-binary
+    
+    pip install flask_login
 ```
-
-## Running The App
-
-```bash
-python main.py
+We're using PosgreSQL for this web app, you can download this at:
 ```
+    https://www.postgresql.org/download/.
+```
+After installing PosgreSQL, please create a database and run the code in the file `data_vocab_v2.sql` .
 
-## Viewing The App
+You need to edit the following line of code in the `__init__.py` file:
+```
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:ryhoangf@localhost/goikanji_db'
+```   
+with the following syntax:
+```
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:your password@localhost/your database name'
+```
+Finally, try running the `main.py` file to use the program.
 
-Go to `http://127.0.0.1:5000`
+Demo Video:
+```
+    https://drive.google.com/file/d/1KFPHlBEIqW6jflmphGkkFVQXISulyADR/view?usp=sharing
+```
