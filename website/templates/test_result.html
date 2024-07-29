@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Test result{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 align="center">Test result</h1>
+    <p class="text-center"><strong>Your score:</strong> {{ score }}</p>
+    <p class="text-center"><strong>Rate:</strong> {{ percentage }}%</p>
+
+    {% if percentage >= 80 %}
+        <div class="alert alert-success" role="alert">
+            Nice^^ You passed the exam.
+        </div>
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            You should review this lesson.
+        </div>
+    {% endif %}
+
+    <div class="text-center">
+        <a href="{{ url_for('views.lesson_vocabulary', lesson_id=lesson_id) }}" class="btn btn-primary">Review Lesson</a>
+        <a href="{{ url_for('views.home') }}" class="btn btn-secondary">Back to Home</a>
+    </div>
+</div>
+{% endblock %}
