@@ -5,7 +5,7 @@
 {% block content %}
 <style>
     body {
-        background-color: #93f1ff; /* Màu nền cho toàn bộ trang */
+        background-color: #4F8FC0; /* Màu nền cho toàn bộ trang */
     }
     .header {
         text-align: center;
@@ -14,14 +14,14 @@
     .header h1 {
         font-size: 36px;
         font-weight: bold;
-        color: #000000;
+        color: #f9f7f1;
         text-shadow: 5px 5px 7px rgba(214, 14, 14, 0.1);
         animation: bounce 2.5s infinite; /* Thêm hiệu ứng nhảy nhót */
         transition: transform 0.3s, color 0.3s;
     }
     .header h1:hover {
         transform: scale(1.05);
-        color: #e79860; 
+        color: #842d72; 
     }
 
     /* Định nghĩa animation nhảy nhót */
@@ -39,7 +39,7 @@
 
     .todo-container {
         margin-top: 20px;
-        background-color: #ffd3b9d4;
+        background-color: #f5deb3;
         border-radius: 8px;
         padding: 20px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -72,10 +72,36 @@
     .btn-primary {
         border-radius: 5px;
     }
+    .guide-container {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .guide-container h3 {
+        font-size: 24px;
+        margin-bottom: 15px;
+        text-align: center;
+        color: #000000;
+    }
+    .guide-container p {
+        font-size: 16px;
+        line-height: 1.5;
+        color: #333333;
+    }
+    .guide-container ul {
+        margin: 10px 0;
+        padding-left: 20px;
+    }
+    .guide-container ol {
+        margin: 10px 0;
+        padding-left: 20px;
+    }
 </style>
 
 <div class="header">
-    <h1>Study Plan & Note</h1>
+    <h1>Kanji - Goi Learning App</h1>
 </div>
 
 <div class="container todo-container">
@@ -83,14 +109,14 @@
     <form method="POST" class="mt-4">
         <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <div class="input-group">
-            <input type="text" name="todo_title" id="todo_title" class="form-control" placeholder="Add a new todo" required />
+            <input type="text" name="todo_title" id="todo_title" class="form-control" placeholder="Add a new note" required />
             <div class="input-group-append">
                 <button type="submit" class="btn btn-primary">Add Note</button>
             </div>
         </div>
     </form>
 
-    <h2 class="mt-4 text-center">Your Note List</h2>
+    <h2 class="mt-4 text-center">Study Plan and Notes</h2>
     <ul class="list-group">
         {% for todo in todos %}
             <li class="list-group-item">
@@ -104,6 +130,34 @@
             <li class="list-group-item">No notes found.</li>
         {% endfor %}
     </ul>
+</div>
+
+<div class="guide-container">
+    <h3>Instruction to Japanese learners</h3>
+    <p>
+        Welcome to our vocabulary and Kanji learning website, developed by the HUST - SIT student team as part of the gPBL 2024 project. Our website is designed to help you learn vocabulary and Kanji effectively through three main solutions:
+    </p>
+    <ul>
+        <li><strong>Structured Learning Materials:</strong> We provide a systematized library of materials categorized by proficiency levels, making it easy to find content that matches your current level.</li>
+        <li><strong>Spaced Repetition Method:</strong> To ensure long-term retention, we employ the Spaced Repetition method combined with quizzes. This approach helps you review vocabulary more effectively.</li>
+        <li><strong>Community Interaction:</strong> You can share your mnemonic techniques through comments and receive assistance from fellow learners.</li>
+    </ul>
+    <p>
+        <strong>How to Use the Website:</strong>
+    </p>
+    <ol>
+        <li><strong>Create an Account:</strong> First, you need to create an account to access the features of the website.</li>
+        <li><strong>Choose Your Learning Content:</strong> After logging in, you can choose to study Kanji or vocabulary based on your needs. Levels are organized according to the Japanese proficiency standards for easy selection.</li>
+        <li><strong>Study and Test:</strong> Each lesson has two modes:
+            <ul>
+                <li><strong>Study:</strong> Learn through flashcards. During the study session, you can comment and share your mnemonic methods with other learners.</li>
+                <li><strong>Test:</strong> After studying, take quizzes to reinforce your knowledge and improve retention.</li>
+            </ul>
+        </li>
+        <li><strong>Review:</strong> After some time, the system will use Spaced Repetition to remind you to review vocabulary through notifications. This helps you maintain long-term retention effectively.</li>
+        <li><strong>Update Personal Information:</strong> You can update your personal information in the <strong>Profile</strong> section.</li>
+    </ol>
+    <p>We hope you enjoy your learning experience and find success with Japanese on our website. Happy learning!</p>
 </div>
 
 <script>
