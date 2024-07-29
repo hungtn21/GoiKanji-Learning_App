@@ -169,7 +169,6 @@ def take_test(lesson_id):
 def submit_test():
     lesson_id = request.form.get('lesson_id')
     current_time = datetime.now()
-
     # Tìm kiếm tiến trình học tập của người dùng
     user_progress = UserProgress.query.filter_by(id=current_user.id, lesson_id=lesson_id).first()
 
@@ -185,35 +184,27 @@ def submit_test():
             next_review=current_time + timedelta(minutes=1)
         )
         db.session.add(user_progress)
-
     db.session.commit()
-
     # Đếm số câu đúng
     correct_answers = sum(
         1 for question in Question.query.filter_by(lesson_id=lesson_id).all()
         if request.form.get(f'question_{question.question_id}') == question.correct_answer
     )
-    
     total_questions = Question.query.filter_by(lesson_id=lesson_id).count()
-
     # Tính điểm
     score = f"{correct_answers}/{total_questions}"
-    
     # Tính tỷ lệ phần trăm
     percentage = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+    # điều hướng qua trang kết quả
+    return redirect(url_for('views.test_result', score=score, percentage=percentage, lesson_id=lesson_id))
 
-    # Gửi thông báo cho người dùng
-    message = ''
-    if percentage >= 80:
-        message = f'Wonderful! You passed the exam. Your score: {score}.'
-    else:
-        message = f'You should review this lesson. Your score: {score}.'
-    
-    flash(message, 'success' if percentage >= 80 else 'danger')
-
-    # Chuyển hướng về trang chủ
-    return redirect(url_for('views.home'))
-
+@views.route('/test_result')
+@login_required
+def test_result():
+    score = request.args.get('score')
+    percentage = float(request.args.get('percentage'))
+    lesson_id = request.args.get('lesson_id')
+    return render_template('test_result.html', score=score, percentage=percentage, lesson_id=lesson_id)
 
 
 @views.route('/update_progress/<int:user_id>', methods=['POST'])
@@ -224,9 +215,10 @@ def update_progress(user_id):
     notifications = []
 
     for progress in user_progresses:
-        if current_time >= progress.next_review:
-            notifications.append(f"{current_time.strftime('%Y-%m-%d %H:%M:%S')}: It's time to review lesson {progress.lesson_id}.")
-
+        if progress.times_reviewed <= 5:
+            if current_time >= progress.next_review:
+                notifications.append(f"{current_time.strftime('%Y-%m-%d %H:%M:%S')}: It's time to review lesson {progress.lesson_id}.")
+                progress.next_review += timedelta(minutes=progress.times_reviewed * 2)
     db.session.commit()
     return jsonify({"status": "success", "notifications": notifications})
 
