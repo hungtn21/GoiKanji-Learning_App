@@ -1,3 +1,5 @@
+**Visit our website here:** [GoiKanji Learning](hungngtran.pythonanywhere.com)
+
 This project is developed by the HUST - SIT student team as part of the online session of gPBL (global Project-Based Learning) 2024. Our project is designed to help you learn vocabulary and Kanji effectively through three main solutions:
 
 **1. Structured Learning Materials:** We provide a systematized library of materials categorized by proficiency levels, making it easy to find content that matches your current level.
